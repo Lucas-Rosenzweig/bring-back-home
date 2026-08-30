@@ -1,4 +1,4 @@
-class FrameControl:
+class IEEE80211FrameControl:
     def __init__(self, raw : bytes) -> None:
 
         if len(raw) != 2:
