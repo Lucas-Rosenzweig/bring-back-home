@@ -54,8 +54,10 @@ class IEEE80211ManagementFrameTest(unittest.TestCase):
         self.assertIn("    Address 3          : 10:20:30:40:50:60", rendered)
         self.assertIn("    Sequence Control   : 78 56", rendered)
         self.assertIn("  Action Body:", rendered)
-        self.assertIn("    Category           : 4", rendered)
-        self.assertIn("    Action Data        : 01 02", rendered)
+        self.assertIn("    Category           : 0x04", rendered)
+        self.assertIn("    Action Data:", rendered)
+        self.assertIn("      Unknown Action:", rendered)
+        self.assertIn("        Raw Data           : 01 02", rendered)
 
     def test_rejects_non_management_frame(self) -> None:
         data_frame = b"\x08\x00" + MANAGEMENT_HEADER_REMAINDER
