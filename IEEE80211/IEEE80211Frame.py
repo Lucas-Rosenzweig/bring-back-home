@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from IEEE80211Frame.body.IEEE80211Body import IEEE80211Body
-from IEEE80211Frame.header.IEEE80211Header import IEEE80211Header;
+from IEEE80211.body.IEEE80211Body import IEEE80211Body
+from IEEE80211.header.IEEE80211Header import IEEE80211Header;
 
 class IEEE80211Frame(ABC):
     raw: bytes

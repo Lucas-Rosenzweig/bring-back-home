@@ -1,6 +1,6 @@
 from typing import Final, override
 
-from IEEE80211Frame.header.IEEE80211Header import IEEE80211Header
+from IEEE80211.header.IEEE80211Header import IEEE80211Header
 
 
 class IEEE80211ManagementHeader(IEEE80211Header):

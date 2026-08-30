@@ -2,9 +2,9 @@ from contextlib import redirect_stdout
 from io import StringIO
 import unittest
 
-from IEEE80211Frame.IEEE80211ManagementFrame import IEEE80211ManagementFrame
-from IEEE80211Frame.body.IEEE80211ActionBody import IEEE80211ActionBody
-from IEEE80211Frame.header.IEEE80211ManagementHeader import IEEE80211ManagementHeader
+from IEEE80211.IEEE80211ManagementFrame import IEEE80211ManagementFrame
+from IEEE80211.body.IEEE80211ActionBody import IEEE80211ActionBody
+from IEEE80211.header.IEEE80211ManagementHeader import IEEE80211ManagementHeader
 
 
 MANAGEMENT_HEADER_REMAINDER = b"\x00" * 22

@@ -1,6 +1,6 @@
 from typing import override
 
-from IEEE80211Frame.body.IEEE80211Body import IEEE80211Body
+from IEEE80211.body.IEEE80211Body import IEEE80211Body
 
 
 class IEEE80211ActionBody(IEEE80211Body):

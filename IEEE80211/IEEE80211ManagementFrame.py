@@ -1,9 +1,9 @@
 from enum import IntEnum
 from typing import ClassVar, override
 
-from IEEE80211Frame.IEEE80211Frame import IEEE80211Frame
-from IEEE80211Frame.body.IEEE80211ActionBody import IEEE80211ActionBody
-from IEEE80211Frame.header.IEEE80211ManagementHeader import IEEE80211ManagementHeader
+from IEEE80211.IEEE80211Frame import IEEE80211Frame
+from IEEE80211.body.IEEE80211ActionBody import IEEE80211ActionBody
+from IEEE80211.header.IEEE80211ManagementHeader import IEEE80211ManagementHeader
 
 
 class ManagementSubtype(IntEnum):

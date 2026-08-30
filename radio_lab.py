@@ -1,8 +1,8 @@
 import socket
 
-from IEEE80211Frame.IEEE80211Frame import IEEE80211Frame
-from IEEE80211Frame.IEEE80211FrameParser import IEEE80211FrameParser
-from IEEE80211Frame.IEEE80211ManagementFrame import IEEE80211ManagementFrame
+from IEEE80211.IEEE80211Frame import IEEE80211Frame
+from IEEE80211.IEEE80211FrameParser import IEEE80211FrameParser
+from IEEE80211.IEEE80211ManagementFrame import IEEE80211ManagementFrame
 
 sock = socket.socket(
     socket.AF_PACKET,

@@ -1,7 +1,7 @@
-from IEEE80211Frame.header.IEEE80211FrameControl import IEEE80211FrameControl
-from IEEE80211Frame.header.IEEE80211FrameType import IEEE80211FrameType
-from IEEE80211Frame.IEEE80211Frame import IEEE80211Frame
-from IEEE80211Frame.IEEE80211ManagementFrame import IEEE80211ManagementFrame
+from IEEE80211.header.IEEE80211FrameControl import IEEE80211FrameControl
+from IEEE80211.header.IEEE80211FrameType import IEEE80211FrameType
+from IEEE80211.IEEE80211Frame import IEEE80211Frame
+from IEEE80211.IEEE80211ManagementFrame import IEEE80211ManagementFrame
 
 
 class IEEE80211FrameParser:

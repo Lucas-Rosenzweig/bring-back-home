@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from IEEE80211Frame.header.IEEE80211FrameControl import IEEE80211FrameControl
+from IEEE80211.header.IEEE80211FrameControl import IEEE80211FrameControl
 
 
 class IEEE80211Header(ABC):
