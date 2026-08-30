@@ -19,5 +19,5 @@ class IEEE80211Header(ABC):
         pass
 
     @abstractmethod
-    def print(self) -> None:
+    def print(self, indent: str = "") -> None:
         pass

@@ -1,3 +1,5 @@
+from contextlib import redirect_stdout
+from io import StringIO
 import unittest
 
 from IEEE80211Frame.IEEE80211ManagementFrame import IEEE80211ManagementFrame
@@ -25,6 +27,35 @@ class IEEE80211ManagementFrameTest(unittest.TestCase):
         assert isinstance(body, IEEE80211ActionBody)
         self.assertEqual(body.category, 4)
         self.assertEqual(body.action_data, b"\x01\x02")
+
+    def test_prints_management_header_and_action_body(self) -> None:
+        raw = (
+            b"\xd0\x00"
+            + b"\x34\x12"
+            + b"\x00\x11\x22\x33\x44\x55"
+            + b"\xaa\xbb\xcc\xdd\xee\xff"
+            + b"\x10\x20\x30\x40\x50\x60"
+            + b"\x78\x56"
+            + b"\x04\x01\x02"
+        )
+        frame = IEEE80211ManagementFrame(raw)
+        output = StringIO()
+
+        with redirect_stdout(output):
+            frame.print()
+
+        rendered = output.getvalue()
+        self.assertIn("IEEE 802.11 Management Frame:", rendered)
+        self.assertIn("  Management Header:", rendered)
+        self.assertIn("    Frame Control:", rendered)
+        self.assertIn("    Duration           : 34 12", rendered)
+        self.assertIn("    Address 1          : 00:11:22:33:44:55", rendered)
+        self.assertIn("    Address 2          : aa:bb:cc:dd:ee:ff", rendered)
+        self.assertIn("    Address 3          : 10:20:30:40:50:60", rendered)
+        self.assertIn("    Sequence Control   : 78 56", rendered)
+        self.assertIn("  Action Body:", rendered)
+        self.assertIn("    Category           : 4", rendered)
+        self.assertIn("    Action Data        : 01 02", rendered)
 
     def test_rejects_non_management_frame(self) -> None:
         data_frame = b"\x08\x00" + MANAGEMENT_HEADER_REMAINDER

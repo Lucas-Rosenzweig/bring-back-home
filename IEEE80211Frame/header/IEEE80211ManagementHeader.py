@@ -29,5 +29,12 @@ class IEEE80211ManagementHeader(IEEE80211Header):
         self.sequence_controll = self.raw[22:24]
 
     @override
-    def print(self) -> None:
-        print("Implémenter le print de Management header")
+    def print(self, indent: str = "") -> None:
+        field_indent = f"{indent}  "
+        print(f"{indent}Management Header:")
+        self.frame_control.print(field_indent)
+        print(f"{field_indent}Duration           : {self.duration.hex(' ')}")
+        print(f"{field_indent}Address 1          : {self.address1.hex(':')}")
+        print(f"{field_indent}Address 2          : {self.address2.hex(':')}")
+        print(f"{field_indent}Address 3          : {self.address3.hex(':')}")
+        print(f"{field_indent}Sequence Control   : {self.sequence_controll.hex(' ')}")

@@ -35,3 +35,10 @@ class IEEE80211ManagementFrame(IEEE80211Frame):
                 raise NotImplementedError(
                     f"Unsupported management subtype {subtype}"
                 )
+
+    @override
+    def print(self, indent: str = "") -> None:
+        component_indent = f"{indent}  "
+        print(f"{indent}IEEE 802.11 Management Frame:")
+        self.header.print(component_indent)
+        self.body.print(component_indent)

@@ -9,3 +9,7 @@ class IEEE80211Body(ABC):
     @abstractmethod
     def parse(self) -> None:
         pass
+
+    @abstractmethod
+    def print(self, indent: str = "") -> None:
+        pass

@@ -51,18 +51,19 @@ class FrameControl:
     def plus_htc_order(self) -> int:
         return (self._value >> 15) & 1
 
-    def print(self) -> None:
-        print("Frame Control:")
-        print(f"  Raw                : {self.raw.hex(' ')}")
-        print(f"  Value              : 0x{self._value:04X}")
-        print(f"  Protocol Version   : {self.protocol_version}")
-        print(f"  Type               : {self.type}")
-        print(f"  Subtype            : {self.subtype}")
-        print(f"  To DS              : {self.to_ds}")
-        print(f"  From DS            : {self.from_ds}")
-        print(f"  More Fragments     : {self.more_fragments}")
-        print(f"  Retry              : {self.retry}")
-        print(f"  Power Management   : {self.power_management}")
-        print(f"  More Data          : {self.more_data}")
-        print(f"  Protected Frame    : {self.protected_frame}")
-        print(f"  +HTC / Order       : {self.plus_htc_order}")
+    def print(self, indent: str = "") -> None:
+        field_indent = f"{indent}  "
+        print(f"{indent}Frame Control:")
+        print(f"{field_indent}Raw                : {self.raw.hex(' ')}")
+        print(f"{field_indent}Value              : 0x{self._value:04X}")
+        print(f"{field_indent}Protocol Version   : {self.protocol_version}")
+        print(f"{field_indent}Type               : {self.type}")
+        print(f"{field_indent}Subtype            : {self.subtype}")
+        print(f"{field_indent}To DS              : {self.to_ds}")
+        print(f"{field_indent}From DS            : {self.from_ds}")
+        print(f"{field_indent}More Fragments     : {self.more_fragments}")
+        print(f"{field_indent}Retry              : {self.retry}")
+        print(f"{field_indent}Power Management   : {self.power_management}")
+        print(f"{field_indent}More Data          : {self.more_data}")
+        print(f"{field_indent}Protected Frame    : {self.protected_frame}")
+        print(f"{field_indent}+HTC / Order       : {self.plus_htc_order}")

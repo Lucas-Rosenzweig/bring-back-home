@@ -17,3 +17,10 @@ class IEEE80211ActionBody(IEEE80211Body):
 
         self.category = self.raw[0]
         self.action_data = self.raw[1:]
+
+    @override
+    def print(self, indent: str = "") -> None:
+        field_indent = f"{indent}  "
+        print(f"{indent}Action Body:")
+        print(f"{field_indent}Category           : {self.category}")
+        print(f"{field_indent}Action Data        : {self.action_data.hex(' ')}")

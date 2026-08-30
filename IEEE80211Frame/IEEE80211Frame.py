@@ -14,3 +14,7 @@ class IEEE80211Frame(ABC):
     @abstractmethod
     def parse(self) -> None:
         pass
+
+    @abstractmethod
+    def print(self, indent: str = "") -> None:
+        pass
