@@ -16,7 +16,7 @@ class IEEE80211ManagementHeader(IEEE80211Header):
         self.parse()
 
     def parse(self) -> None:
-        if len(self.raw) is not self.MANAGEMENT_HEADER_SIZE:
+        if len(self.raw) != self.MANAGEMENT_HEADER_SIZE:
             raise ValueError("Management header should be 24 bytes long")
 
         self.duration = self.raw[2:4]
