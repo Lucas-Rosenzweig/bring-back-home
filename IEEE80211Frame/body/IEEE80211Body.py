@@ -1,0 +1,11 @@
+from abc import ABC, abstractmethod
+
+class IEEE80211Body(ABC):
+    raw: bytes
+
+    def __init__(self, raw: bytes) -> None:
+        self.raw = raw
+
+    @abstractmethod
+    def parse(self) -> None:
+        pass
