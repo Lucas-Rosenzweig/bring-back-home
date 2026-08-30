@@ -17,3 +17,7 @@ class IEEE80211Header(ABC):
     @abstractmethod
     def parse(self) -> None:
         pass
+
+    @abstractmethod
+    def print(self) -> None:
+        pass

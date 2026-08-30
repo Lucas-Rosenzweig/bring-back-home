@@ -1,6 +1,6 @@
 import socket
 
-from frame_control import FrameControl
+from IEEE80211Frame.FrameControl import FrameControl
 
 sock = socket.socket(
     socket.AF_PACKET,
@@ -26,11 +26,11 @@ while True:
     packet, _ = sock.recvfrom(65535)
 
     #Strip radiotap header
-    wifi_frame = strip_radiotap(packet)
-    if not wifi_frame:
+    mac_frame = strip_radiotap(packet)
+    if not mac_frame:
         continue
 
-    print(int.from_bytes(wifi_frame[2:4],"little"))
-    frame_control = FrameControl(wifi_frame[0:2])
+    print(int.from_bytes(mac_frame[2:4],"little"))
+    frame_control = FrameControl(mac_frame[0:2])
     if(frame_control.type == 0 and frame_control.subtype == 13):
         frame_control.print()
