@@ -1,3 +1,5 @@
+from typing import override
+
 from IEEE80211Frame.header.IEEE80211Header import IEEE80211Header
 
 
@@ -15,6 +17,7 @@ class IEEE80211ManagementHeader(IEEE80211Header):
         super().__init__(raw)
         self.parse()
 
+    @override
     def parse(self) -> None:
         if len(self.raw) != self.MANAGEMENT_HEADER_SIZE:
             raise ValueError("Management header should be 24 bytes long")
@@ -25,5 +28,6 @@ class IEEE80211ManagementHeader(IEEE80211Header):
         self.address3 = self.raw[16:22]
         self.sequence_controll = self.raw[22:24]
 
+    @override
     def print(self) -> None:
         print("Implémenter le print de Management header")

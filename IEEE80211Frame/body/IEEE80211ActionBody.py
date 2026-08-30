@@ -1,3 +1,5 @@
+from typing import override
+
 from IEEE80211Frame.body.IEEE80211Body import IEEE80211Body
 
 
@@ -8,6 +10,7 @@ class IEEE80211ActionBody(IEEE80211Body):
         super().__init__(raw)
         self.parse()
 
+    @override
     def parse(self) -> None:
         if not self.raw:
             raise ValueError("Action body must contain a category")

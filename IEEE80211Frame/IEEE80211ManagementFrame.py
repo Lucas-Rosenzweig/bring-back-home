@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import ClassVar
+from typing import ClassVar, override
 
 from IEEE80211Frame.IEEE80211Frame import IEEE80211Frame
 from IEEE80211Frame.body.IEEE80211ActionBody import IEEE80211ActionBody
@@ -17,6 +17,7 @@ class IEEE80211ManagementFrame(IEEE80211Frame):
         super().__init__(raw)
         self.parse()
 
+    @override
     def parse(self) -> None:
         header_size = IEEE80211ManagementHeader.MANAGEMENT_HEADER_SIZE
         self.header = IEEE80211ManagementHeader(self.raw[:header_size])
