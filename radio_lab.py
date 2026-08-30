@@ -1,6 +1,8 @@
 import socket
 
-from IEEE80211Frame.FrameControl import FrameControl
+from IEEE80211Frame.IEEE80211Frame import IEEE80211Frame
+from IEEE80211Frame.IEEE80211FrameParser import IEEE80211FrameParser
+from IEEE80211Frame.IEEE80211ManagementFrame import IEEE80211ManagementFrame
 
 sock = socket.socket(
     socket.AF_PACKET,
@@ -30,7 +32,8 @@ while True:
     if not mac_frame:
         continue
 
-    print(int.from_bytes(mac_frame[2:4],"little"))
-    frame_control = FrameControl(mac_frame[0:2])
-    if(frame_control.type == 0 and frame_control.subtype == 13):
-        frame_control.print()
+    try:
+        mac_frame = IEEE80211FrameParser.parse(mac_frame)
+        mac_frame.print()
+    except NotImplementedError:
+        continue

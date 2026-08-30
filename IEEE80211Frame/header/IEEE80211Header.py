@@ -3,8 +3,6 @@ from abc import ABC, abstractmethod
 from IEEE80211Frame.header.IEEE80211FrameControl import IEEE80211FrameControl
 
 
-
-
 class IEEE80211Header(ABC):
     raw: bytes
     frame_control: IEEE80211FrameControl

@@ -1,4 +1,4 @@
-from typing import override
+from typing import Final, override
 
 from IEEE80211Frame.header.IEEE80211Header import IEEE80211Header
 
@@ -10,8 +10,7 @@ class IEEE80211ManagementHeader(IEEE80211Header):
     address3: bytes #0x10
     sequence_controll: bytes #0x16
 
-    MANAGEMENT_HEADER_SIZE = 24
-
+    MANAGEMENT_HEADER_SIZE: Final[int] = 24
 
     def __init__(self, raw: bytes) -> None:
         super().__init__(raw)
