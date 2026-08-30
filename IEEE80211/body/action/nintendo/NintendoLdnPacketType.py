@@ -1,5 +1,5 @@
-from enum import IntEnum
+from enum import Enum
 
 
-class NintendoLdnPacketType(IntEnum):
-    ADVERTISEMENT = 0x0101
+class NintendoLdnPacketType(Enum):
+    ADVERTISEMENT = b"\x01\x01"

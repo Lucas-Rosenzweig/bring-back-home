@@ -1,7 +1,7 @@
-from enum import IntEnum
+from enum import Enum
 
 
-class NintendoLdnAdvertisementFormat(IntEnum):
-    PLAIN = 1
-    AES_CTR = 2
-    AES_GCM = 3
+class NintendoLdnAdvertisementFormat(Enum):
+    PLAIN = b"\x01"
+    AES_CTR = b"\x02"
+    AES_GCM = b"\x03"

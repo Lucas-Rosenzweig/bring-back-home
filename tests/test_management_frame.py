@@ -25,7 +25,7 @@ class IEEE80211ManagementFrameTest(unittest.TestCase):
         body = frame.body
         self.assertIsInstance(body, IEEE80211ActionBody)
         assert isinstance(body, IEEE80211ActionBody)
-        self.assertEqual(body.category, 4)
+        self.assertEqual(body.category, b"\x04")
         self.assertEqual(body.action_data, b"\x01\x02")
 
     def test_prints_management_header_and_action_body(self) -> None:

@@ -47,28 +47,35 @@ class NintendoLdnActionTest(unittest.TestCase):
         body = frame.body
         self.assertIsInstance(body, IEEE80211ActionBody)
         assert isinstance(body, IEEE80211ActionBody)
-        self.assertEqual(body.category, 0x7F)
+        self.assertEqual(body.raw, nintendo_ldn_advertisement_body())
+        self.assertEqual(body.category, b"\x7f")
 
         vendor_action = body.action
         self.assertIsInstance(vendor_action, IEEE80211VendorSpecificAction)
         assert isinstance(vendor_action, IEEE80211VendorSpecificAction)
+        self.assertEqual(vendor_action.raw, body.raw[1:])
         self.assertEqual(vendor_action.oui, b"\x00\x22\xaa")
 
         ldn_action = vendor_action.vendor_action
         self.assertIsInstance(ldn_action, NintendoLdnAction)
         assert isinstance(ldn_action, NintendoLdnAction)
-        self.assertEqual(ldn_action.packet_type, NintendoLdnPacketType.ADVERTISEMENT)
+        self.assertEqual(ldn_action.raw, body.raw[4:])
+        self.assertEqual(
+            ldn_action.packet_type,
+            NintendoLdnPacketType.ADVERTISEMENT.value,
+        )
 
         advertisement = ldn_action.payload
         self.assertIsInstance(advertisement, NintendoLdnAdvertisement)
         assert isinstance(advertisement, NintendoLdnAdvertisement)
+        self.assertEqual(advertisement.raw, body.raw[12:])
         self.assertEqual(advertisement.session_info.raw, bytes(range(32)))
-        self.assertEqual(advertisement.ldn_version, 4)
+        self.assertEqual(advertisement.ldn_version, b"\x04")
         self.assertEqual(
             advertisement.encryption_type,
-            NintendoLdnAdvertisementFormat.AES_GCM,
+            NintendoLdnAdvertisementFormat.AES_GCM.value,
         )
-        self.assertEqual(advertisement.data_size, 3)
+        self.assertEqual(advertisement.data_size, b"\x00\x03")
         self.assertEqual(advertisement.nonce, b"\x10\x20\x30\x40")
         self.assertEqual(advertisement.gcm_tag, bytes(range(0xA0, 0xB0)))
         self.assertEqual(advertisement.encrypted_advertisement_data, b"\xde\xad\xbe")
@@ -90,9 +97,9 @@ class NintendoLdnActionTest(unittest.TestCase):
         self.assertIn("Nintendo LDN Action:", rendered)
         self.assertIn("Packet Type         : ADVERTISEMENT", rendered)
         self.assertIn("Advertisement Payload:", rendered)
-        self.assertIn("LDN Version         : 4", rendered)
+        self.assertIn("LDN Version         : 0x04", rendered)
         self.assertIn("Encryption Type     : AES_GCM", rendered)
-        self.assertIn("Data Size           : 3", rendered)
+        self.assertIn("Data Size           : 3 bytes (00 03)", rendered)
         self.assertIn("Nonce               : 10 20 30 40", rendered)
         self.assertIn(
             "GCM Tag             : a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af",

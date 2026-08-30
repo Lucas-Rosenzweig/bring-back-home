@@ -1,5 +1,5 @@
-from enum import IntEnum
+from enum import Enum
 
 
-class IEEE80211ActionCategory(IntEnum):
-    VENDOR_SPECIFIC = 0x7F
+class IEEE80211ActionCategory(Enum):
+    VENDOR_SPECIFIC = b"\x7F"

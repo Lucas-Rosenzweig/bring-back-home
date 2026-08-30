@@ -5,49 +5,49 @@ from IEEE80211.body.action.nintendo.NintendoLdnAdvertisement import NintendoLdnA
 from IEEE80211.body.action.nintendo.NintendoLdnPacketType import NintendoLdnPacketType
 from IEEE80211.body.action.nintendo.NintendoLdnPayload import NintendoLdnPayload
 from IEEE80211.body.action.nintendo.UnknownNintendoLdnPayload import UnknownNintendoLdnPayload
-from IEEE80211.parsing.ByteReader import ByteReader
 
 
 class NintendoLdnAction(IEEE80211VendorAction):
-    LDN_PROTOCOL_ID: ClassVar[int] = 0x04
+    LDN_PROTOCOL_ID: ClassVar[bytes] = b"\x04"
 
-    protocol_id: int
+    protocol_id: bytes
     padding: bytes
-    packet_type: int
+    packet_type: bytes
     reserved: bytes
     payload: NintendoLdnPayload
 
     @override
     def parse(self) -> None:
-        reader = ByteReader(self.raw)
-        self.protocol_id = reader.read_u8("Nintendo protocol identifier")
+        if len(self.raw) < 8:
+            raise ValueError("Nintendo LDN action must contain an 8-byte header")
+
+        self.protocol_id = self.raw[0:1]
         if self.protocol_id != self.LDN_PROTOCOL_ID:
             raise ValueError(
-                f"Unsupported Nintendo protocol identifier 0x{self.protocol_id:02X}"
+                f"Unsupported Nintendo protocol identifier 0x{self.protocol_id.hex().upper()}"
             )
 
-        self.padding = reader.read_bytes(1, "Nintendo LDN padding")
-        self.packet_type = reader.read_u16_be("Nintendo LDN packet type")
-        self.reserved = reader.read_bytes(4, "Nintendo LDN reserved bytes")
-        payload_raw = reader.read_remaining()
+        self.padding = self.raw[1:2]
+        self.packet_type = self.raw[2:4]
+        self.reserved = self.raw[4:8]
+        payload_raw = self.raw[8:]
 
-        match self.packet_type:
-            case NintendoLdnPacketType.ADVERTISEMENT:
-                self.payload = NintendoLdnAdvertisement(payload_raw)
-            case _:
-                self.payload = UnknownNintendoLdnPayload(payload_raw)
+        if self.packet_type == NintendoLdnPacketType.ADVERTISEMENT.value:
+            self.payload = NintendoLdnAdvertisement(payload_raw)
+        else:
+            self.payload = UnknownNintendoLdnPayload(payload_raw)
 
     def _packet_type_name(self) -> str:
         try:
             return NintendoLdnPacketType(self.packet_type).name
         except ValueError:
-            return f"UNKNOWN (0x{self.packet_type:04X})"
+            return f"UNKNOWN (0x{self.packet_type.hex().upper()})"
 
     @override
     def print(self, indent: str = "") -> None:
         field_indent = f"{indent}  "
         print(f"{indent}Nintendo LDN Action:")
-        print(f"{field_indent}Protocol ID         : 0x{self.protocol_id:02X}")
+        print(f"{field_indent}Protocol ID         : 0x{self.protocol_id.hex().upper()}")
         print(f"{field_indent}Padding             : {self.padding.hex(' ')}")
         print(f"{field_indent}Packet Type         : {self._packet_type_name()}")
         print(f"{field_indent}Reserved            : {self.reserved.hex(' ')}")
