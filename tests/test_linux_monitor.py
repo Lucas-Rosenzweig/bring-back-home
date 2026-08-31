@@ -1,10 +1,10 @@
 import subprocess
 import unittest
 from collections.abc import Sequence
+from typing import Any
 from unittest.mock import patch
 
 from Wifi.LinuxMonitor import LinuxMonitor
-
 
 IW_DEV = """phy#0
 \tInterface wlan0
@@ -44,7 +44,7 @@ class FakeSocket:
 class TestMonitor(LinuxMonitor):
     __test__ = False
 
-    def __init__(self, iw_dev: str = IW_DEV, **kwargs: object) -> None:
+    def __init__(self, iw_dev: str = IW_DEV, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.iw_dev = iw_dev
         self.commands: list[tuple[str, ...]] = []
@@ -110,13 +110,15 @@ class LinuxMonitorLifecycleTest(unittest.TestCase):
         fake_socket = FakeSocket()
         monitor = TestMonitor(initial_channel=1)
 
-        with patch("Wifi.LinuxMonitor.socket.socket", return_value=fake_socket):
-            with monitor:
-                self.assertEqual(fake_socket.bound_to, ("mon0", 0))
-                self.assertIn(
-                    ("ip", "link", "set", "dev", "wlan0", "down"),
-                    monitor.commands,
-                )
+        with (
+            patch("Wifi.LinuxMonitor.socket.socket", return_value=fake_socket),
+            monitor,
+        ):
+            self.assertEqual(fake_socket.bound_to, ("mon0", 0))
+            self.assertIn(
+                ("ip", "link", "set", "dev", "wlan0", "down"),
+                monitor.commands,
+            )
 
         self.assertTrue(fake_socket.closed)
         self.assertIn(("iw", "dev", "mon0", "del"), monitor.commands)
@@ -162,9 +164,11 @@ class LinuxMonitorLifecycleTest(unittest.TestCase):
         fake_socket = FakeSocket(OSError("bind failed"))
         monitor = TestMonitor()
 
-        with patch("Wifi.LinuxMonitor.socket.socket", return_value=fake_socket):
-            with self.assertRaisesRegex(OSError, "bind failed"):
-                monitor.open()
+        with (
+            patch("Wifi.LinuxMonitor.socket.socket", return_value=fake_socket),
+            self.assertRaisesRegex(OSError, "bind failed"),
+        ):
+            monitor.open()
 
         self.assertTrue(fake_socket.closed)
         self.assertIn(("iw", "dev", "mon0", "del"), monitor.commands)

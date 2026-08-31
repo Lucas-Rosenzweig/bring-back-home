@@ -10,6 +10,7 @@ import threading
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from types import TracebackType
+from typing import Self
 
 from IEEE80211.radiotap import extract_frame
 
@@ -167,7 +168,7 @@ class LinuxMonitor:
                     self._set_managed(state.name, True)
                 if state.was_up:
                     self._run(["ip", "link", "set", "dev", state.name, "up"])
-            except BaseException as error:
+            except Exception as error:  # noqa: BLE001 - continue best-effort cleanup
                 errors.append(error)
                 remaining.append(state)
         self._saved_interfaces = remaining
@@ -198,7 +199,7 @@ class LinuxMonitor:
                 channels.add(int(match.group(1)))
         return channels
 
-    def open(self) -> "LinuxMonitor":
+    def open(self) -> Self:
         if self._is_open:
             raise RuntimeError("monitor interface is already open")
         self._hopping_error = None
@@ -277,14 +278,14 @@ class LinuxMonitor:
         if self._socket is not None:
             try:
                 self._socket.close()
-            except BaseException as error:
+            except Exception as error:  # noqa: BLE001 - continue best-effort cleanup
                 errors.append(error)
             self._socket = None
 
         if self._owns_interface:
             try:
                 self._run(["iw", "dev", self.mon_iface, "del"])
-            except BaseException as error:
+            except Exception as error:  # noqa: BLE001 - continue best-effort cleanup
                 errors.append(error)
             else:
                 self._owns_interface = False
@@ -303,7 +304,7 @@ class LinuxMonitor:
                 error.add_note(repr(cleanup_error))
             raise error from errors[0]
 
-    def __enter__(self) -> "LinuxMonitor":
+    def __enter__(self) -> Self:
         return self.open()
 
     def __exit__(
@@ -332,9 +333,7 @@ class LinuxMonitor:
         with self._channel_lock:
             if channel == self._configured_channel:
                 return
-            self._run(
-                ["iw", "dev", self.mon_iface, "set", "channel", str(channel)]
-            )
+            self._run(["iw", "dev", self.mon_iface, "set", "channel", str(channel)])
             self._configured_channel = channel
             self.current_channel = channel
 
@@ -351,7 +350,7 @@ class LinuxMonitor:
                     self.set_channel(channel)
                     if self._hopping_stop.wait(dwell_seconds):
                         return
-        except BaseException as error:
+        except Exception as error:  # noqa: BLE001 - propagate worker failures to scan
             self._hopping_error = error
             self._hopping_stop.set()
 

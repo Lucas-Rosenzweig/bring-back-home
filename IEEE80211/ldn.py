@@ -5,9 +5,8 @@ from dataclasses import dataclass
 from string import printable
 from typing import TextIO
 
-
 VENDOR_SPECIFIC_CATEGORY = 0x7F
-NINTENDO_OUI = b"\x00\x22\xAA"
+NINTENDO_OUI = b"\x00\x22\xaa"
 LDN_PROTOCOL_ID = 0x04
 ADVERTISEMENT_PACKET_TYPE = b"\x01\x01"
 
@@ -33,6 +32,18 @@ class LdnAdvertisement:
     def is_encrypted(self) -> bool:
         return self.encryption_type in {AES_CTR, AES_GCM}
 
+    @property
+    def local_communication_id(self) -> int:
+        return int.from_bytes(self.session_info[:8], "big")
+
+    @property
+    def scene_id(self) -> int:
+        return int.from_bytes(self.session_info[10:12], "big")
+
+    @property
+    def ssid(self) -> bytes:
+        return self.session_info[16:32]
+
     def display(self, file: TextIO | None = None) -> None:
         """Print a readable view of the captured 802.11 LDN frame."""
         output = file if file is not None else sys.stdout
@@ -51,16 +62,16 @@ class LdnAdvertisement:
             f"  Destination        : {self.raw_frame[4:10].hex(':')}",
             f"  Source             : {self.raw_frame[10:16].hex(':')}",
             f"  BSSID              : {self.raw_frame[16:22].hex(':')}",
-            f"  Session info       : {self.session_info.hex(' ')}",
+            f"  Communication ID   : 0x{self.local_communication_id:016X}",
+            f"  Scene ID           : {self.scene_id}",
+            f"  SSID               : {self.ssid.hex()}",
             f"  LDN version        : 0x{self.ldn_version:02X}",
             f"  Encryption         : {format_name} (0x{self.encryption_type:02X})",
             f"  Declared data size : {self.data_size} bytes",
             f"  Nonce              : {self.nonce.hex(' ')}",
         ]
         if self.authentication_tag is not None:
-            lines.append(
-                f"  Authentication tag : {self.authentication_tag.hex(' ')}"
-            )
+            lines.append(f"  Authentication tag : {self.authentication_tag.hex(' ')}")
         if self.integrity_hash is not None:
             lines.append(f"  Integrity hash     : {self.integrity_hash.hex(' ')}")
         lines.extend(
@@ -96,7 +107,9 @@ def _parse_payload(payload: bytes, raw_frame: bytes) -> LdnAdvertisement:
     elif encryption_type == PLAIN:
         data_offset = 72
         if len(payload) < data_offset:
-            raise ValueError("Nintendo LDN advertisement has a truncated integrity hash")
+            raise ValueError(
+                "Nintendo LDN advertisement has a truncated integrity hash"
+            )
         integrity_hash = payload[40:data_offset]
         data_end = data_offset + data_size
     elif encryption_type == AES_CTR:

@@ -5,7 +5,7 @@ from IEEE80211.radiotap import extract_frame
 
 class RadiotapTest(unittest.TestCase):
     def test_extracts_channel_and_removes_fcs(self) -> None:
-        frame = b"\xD0\x00payload"
+        frame = b"\xd0\x00payload"
         packet = (
             b"\x00\x00"
             + (14).to_bytes(2, "little")
