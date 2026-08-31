@@ -1,15 +1,21 @@
 from IEEE80211.IEEE80211FrameParser import IEEE80211FrameParser
 from IEEE80211.IEEE80211ManagementFrame import IEEE80211ManagementFrame
 from IEEE80211.body.IEEE80211ActionBody import IEEE80211ActionBody
-from IEEE80211.body.action.IEEE80211Action import IEEE80211Action
-from IEEE80211.body.action.IEEE80211VendorAction import IEEE80211VendorAction
 from IEEE80211.body.action.IEEE80211VendorSpecificAction import IEEE80211VendorSpecificAction
 from IEEE80211.body.action.nintendo.NintendoLdnAction import NintendoLdnAction
 from IEEE80211.body.action.nintendo.NintendoLdnAdvertisement import NintendoLdnAdvertisement
-from IEEE80211.body.action.nintendo.NintendoLdnPayload import NintendoLdnPayload
 from Wifi.LinuxMonitorInterface import LinuxMonitorInterface
 
-monitor = LinuxMonitorInterface(mon_iface="mon0", phy="phy0")
+LDN_CHANNELS = (1, 6, 11, 36, 40, 44, 48)
+LDN_DWELL_SECONDS = 0.110
+
+monitor = LinuxMonitorInterface(
+    mon_iface="mon0",
+    phy="phy0",
+    initial_channel=LDN_CHANNELS[0],
+)
+monitor.start_channel_hopping(LDN_CHANNELS, dwell_seconds=LDN_DWELL_SECONDS)
+
 try:
     while True:
         capture = monitor.scan()
@@ -38,10 +44,8 @@ try:
             if not isinstance(mac_frame.body.action.vendor_action.payload, NintendoLdnAdvertisement):
                 continue
 
-            print("Advertisement trouvé sur le channel",channel,"!")
-            print("Changement de channel")
-            monitor.set_channel(channel)
-        except NotImplementedError:
+            print("Advertisement trouvé sur le channel", channel, "!")
+        except (NotImplementedError, ValueError):
             continue
 except KeyboardInterrupt:
     print("Supression de l'interface de monitoring et fermeture")
