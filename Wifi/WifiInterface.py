@@ -16,5 +16,5 @@ class WifiInterface(ABC):
         pass
 
     @abstractmethod
-    def scan(self) -> bytes | None:
+    def scan(self) -> tuple[bytes, int | None] | None:
         pass
