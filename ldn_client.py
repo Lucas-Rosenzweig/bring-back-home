@@ -59,21 +59,16 @@ def is_joinable(
 
 
 def display_network(network: NetworkInfo) -> None:
-    print("LDN NetworkInfo déchiffré:")
-    print(f"  Host               : {network.address}")
-    print(f"  Channel            : {network.channel} ({network.band} GHz)")
-    print(f"  Communication ID   : 0x{int(network.local_communication_id):016X}")
-    print(f"  Scene ID           : {int(network.scene_id)}")
-    print(f"  SSID               : {bytes(network.ssid).hex()}")
-    print(f"  LDN version        : {int(network.version)}")
-    print(f"  Application version: {int(network.app_version)}")
-    print(f"  Accept policy      : {int(network.accept_policy)}")
     print(
-        f"  Participants       : {int(network.num_participants)}/"
-        f"{int(network.max_participants)}"
+        "Session LDN: "
+        f"host={network.address}, channel={network.channel}, "
+        f"id=0x{int(network.local_communication_id):016X}, "
+        f"scene={int(network.scene_id)}, version={int(network.version)}, "
+        f"app={int(network.app_version)}, "
+        f"participants={int(network.num_participants)}/"
+        f"{int(network.max_participants)}",
+        flush=True,
     )
-    print(f"  Server random      : {bytes(network.server_random).hex()}")
-    print(f"  Application data   : {bytes(network.application_data).hex(' ')}")
 
 
 def _participant_name(participant: ParticipantInfo) -> str:

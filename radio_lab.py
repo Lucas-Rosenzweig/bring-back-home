@@ -207,7 +207,6 @@ def _capture_target_network(
             monitor.stop_channel_hopping()
             monitor.set_channel(channel)
             print(f"Session cible trouvée sur le canal {channel}.", flush=True)
-            advertisement.display()
             display_network(network)
             return network, passphrase
 

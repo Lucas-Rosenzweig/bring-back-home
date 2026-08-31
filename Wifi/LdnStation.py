@@ -55,7 +55,6 @@ class ActionEvent:
     source: MACAddress
     action: bytes
     channel: int
-    frequency: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -179,7 +178,6 @@ class StationInterface:
                     MACAddress(frame[10:16]),
                     frame[24:],
                     channel,
-                    frequency,
                 )
             if message.type == nl80211.NL80211_CMD_CONTROL_PORT_FRAME:
                 return ControlEvent(
@@ -355,24 +353,6 @@ async def open_station(
                     nl80211.NL80211_ATTR_FRAME_MATCH: b"",
                 },
             )
-            kernel_mac_path = Path(f"/sys/class/net/{interface_name}/address")
-            kernel_mac = (
-                kernel_mac_path.read_text(encoding="ascii").strip()
-                if kernel_mac_path.exists()
-                else "unavailable"
-            )
-            print(
-                "Diagnostic LDN — association nl80211 établie: "
-                f"interface={interface_name} netlink_mac={address} "
-                f"kernel_mac={kernel_mac} bssid={host} "
-                f"channel={network.channel} "
-                f"frequency={CHANNEL_FREQUENCIES[network.channel]}MHz",
-                flush=True,
-            )
-            print(
-                "Diagnostic LDN — clés CCMP installées et action frames enregistrées.",
-                flush=True,
-            )
             yield StationInterface(
                 wlan,
                 router,
@@ -427,11 +407,7 @@ class LdnConnection:
             random.randint(0, 0xFFFFFFFFFFFFFFFF),
             random.randint(0, 0xFFFFFFFFFFFFFFFF),
         )
-        for attempt in range(1, 4):
-            print(
-                f"Diagnostic LDN — authentification, tentative {attempt}/3...",
-                flush=True,
-            )
+        for _ in range(3):
             await self.station.send_control(self.network.address, request)
             with trio.move_on_after(0.7):
                 while True:
@@ -449,11 +425,6 @@ class LdnConnection:
                             )
                         except ValueError:
                             continue
-                        print(
-                            "Diagnostic LDN — réponse d'authentification valide "
-                            f"reçue de {event.source} (status=0).",
-                            flush=True,
-                        )
                         return
                     if isinstance(event, DisassociationEvent):
                         raise ConnectionError("host disassociated the LDN station")
@@ -461,36 +432,16 @@ class LdnConnection:
 
     async def initialize_network(self) -> None:
         await self.station.authorize()
-        print(
-            "Diagnostic LDN — station autorisée; attente de notre participant "
-            f"(mac={self.station.address}) dans les advertisements post-auth...",
-            flush=True,
-        )
         updated: NetworkInfo | None = None
-        event_count = 0
-        action_count = 0
-        host_action_count = 0
-        decoded_count = 0
-        decode_failure_count = 0
-        last_decode_error: str | None = None
-        last_participant_snapshot: tuple[tuple[int, str, str, str], ...] | None = None
-        with trio.move_on_after(20):
+        saw_host_action = False
+        with trio.move_on_after(2):
             while True:
                 event = await self.station.receive()
-                event_count += 1
                 if not isinstance(event, ActionEvent):
                     continue
-                action_count += 1
                 if event.source != self.network.address:
-                    if action_count <= 3:
-                        print(
-                            "Diagnostic LDN — action frame d'une autre source: "
-                            f"source={event.source} channel={event.channel} "
-                            f"frequency={event.frequency}MHz size={len(event.action)}",
-                            flush=True,
-                        )
                     continue
-                host_action_count += 1
+                saw_host_action = True
                 try:
                     candidate = decode_advertisement(
                         event.action,
@@ -499,49 +450,10 @@ class LdnConnection:
                         self.keys,
                         (self.network.protocol,),
                     )
-                except ValueError as error:
-                    decode_failure_count += 1
-                    notes = "; ".join(getattr(error, "__notes__", []))
-                    last_decode_error = f"{error}" + (f" ({notes})" if notes else "")
-                    if decode_failure_count <= 3:
-                        print(
-                            "Diagnostic LDN — advertisement post-auth indécodable: "
-                            f"channel={event.channel} frequency={event.frequency}MHz "
-                            f"size={len(event.action)} error={last_decode_error}",
-                            flush=True,
-                        )
+                except ValueError:
                     continue
-                decoded_count += 1
                 if not self.network.same_network(candidate):
-                    raise ConnectionError(
-                        "host changed to another LDN network: "
-                        f"expected_channel={self.network.channel}, "
-                        f"received_channel={candidate.channel}, "
-                        f"expected_ssid={self.network.ssid.hex()}, "
-                        f"received_ssid={candidate.ssid.hex()}"
-                    )
-                snapshot = tuple(
-                    (
-                        index,
-                        str(participant.mac_address),
-                        participant.ip_address,
-                        participant.name.decode("utf-8", "replace"),
-                    )
-                    for index, participant in enumerate(candidate.participants)
-                    if participant.connected
-                )
-                if snapshot != last_participant_snapshot:
-                    rendered = ", ".join(
-                        f"slot={index} mac={mac} ip={ip} name={name!r}"
-                        for index, mac, ip, name in snapshot
-                    )
-                    print(
-                        "Diagnostic LDN — advertisement post-auth décodée: "
-                        f"channel={event.channel} frequency={event.frequency}MHz "
-                        f"participants=[{rendered}]",
-                        flush=True,
-                    )
-                    last_participant_snapshot = snapshot
+                    raise ConnectionError("host changed to another LDN network")
                 for index, participant in enumerate(candidate.participants):
                     if participant.mac_address == self.station.address:
                         updated = candidate
@@ -550,15 +462,7 @@ class LdnConnection:
                 if updated is not None:
                     break
         if updated is None:
-            summary = (
-                f"events={event_count}, actions={action_count}, "
-                f"host_actions={host_action_count}, decoded={decoded_count}, "
-                f"decode_failures={decode_failure_count}, "
-                f"local_mac={self.station.address}"
-            )
-            if last_decode_error is not None:
-                summary += f", last_decode_error={last_decode_error}"
-            if host_action_count == 0:
+            if not saw_host_action:
                 try:
                     updated, self.local_index = infer_local_participant(
                         self.network,
@@ -569,27 +473,18 @@ class LdnConnection:
                 except ValueError as error:
                     raise TimeoutError(
                         "host did not advertise our LDN participant address and "
-                        f"the fallback was rejected: {error} ({summary})"
+                        f"the fallback was rejected: {error}"
                     ) from error
                 participant = updated.participants[self.local_index]
                 print(
-                    "Diagnostic LDN — aucune advertisement post-auth reçue; "
-                    "fallback déterministe activé après AUTH_SUCCESS: "
-                    f"slot={self.local_index} mac={participant.mac_address} "
-                    f"ip={participant.ip_address}",
+                    "Advertisement post-auth filtrée; allocation déduite: "
+                    f"slot {self.local_index}, {participant.ip_address}",
                     flush=True,
                 )
             else:
                 raise TimeoutError(
-                    "host did not advertise our LDN participant address "
-                    f"within 2s ({summary})"
+                    "host advertisements did not contain our LDN participant"
                 )
-        print(
-            "Diagnostic LDN — participant local trouvé: "
-            f"slot={self.local_index} mac={self.station.address} "
-            f"ip={updated.participants[self.local_index].ip_address}",
-            flush=True,
-        )
         self.network = updated
         host = self.network.participants[0]
         self.network_number = int(host.ip_address.split(".")[2])
