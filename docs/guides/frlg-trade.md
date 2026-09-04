@@ -18,14 +18,14 @@ hôte, ne joue aucun combat et n’envoie aucune commande réservée au Leader.
 ```bash
 pkexec /usr/bin/env PYTHONDONTWRITEBYTECODE=1 \
   "$PWD/.venv/bin/python" "$PWD/pokemon_trade_cli.py" \
-  --variant firered --trainer-id 1 --secret-id 2 --name EMU \
+  --game firered --trainer-id 1 --secret-id 2 --name EMU \
   --passphrase-file "$PWD/.switch/ldn_passphrases.toml" \
   --trades 1 --slots 0 offered-1.pk3 offered-2.pk3
 ```
 
-Le CLI auto-détecte uniquement le communication ID FRLG observé. `--game frlg`
-force le plugin à des fins de diagnostic ; il ne transforme pas un autre jeu
-en session FRLG.
+Le choix `--game firered|leafgreen` configure la variante Gen III et limite la
+découverte aux signatures LDN connues pour FRLG. Il ne transforme pas la
+session d’un autre jeu en session FRLG.
 
 ## Déroulement et export
 
@@ -56,7 +56,7 @@ Une capture JSONL synthétique utilise le même client FRLG sans privilège :
 
 ```bash
 .venv/bin/python pokemon_trade_cli.py \
-  --replay tests/fixtures/frlg/synthetic-trade-v1.jsonl --variant firered \
+  --replay tests/fixtures/frlg/synthetic-trade-v1.jsonl --game firered \
   --trainer-id 1 --secret-id 2 --name EMU offered-1.pk3 offered-2.pk3
 ```
 

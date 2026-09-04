@@ -2,8 +2,8 @@
 
 Bring Back Home est un client Linux expérimental capable de rejoindre une
 session Nintendo Switch LDN comme station et d’effectuer un échange local avec
-Pokémon Rouge Feu ou Vert Feuille. Il contient également un laboratoire radio
-en lecture seule et un mode replay déterministe pour développer sans console.
+Pokémon Rouge Feu ou Vert Feuille. Un mode replay déterministe permet aussi de
+développer sans console.
 
 Le chemin FRLG a été validé sur une carte Intel AX200, mais reste expérimental :
 conservez toujours une copie de vos sauvegardes et de vos Pokémon avant un test
@@ -82,7 +82,7 @@ et le troisième Pokémon de l’équipe.
 ## Effectuer un échange FRLG
 
 1. Sur la Switch, créer un salon d’échange FRLG et le laisser en attente.
-2. Vérifier qu’aucun autre `pokemon_trade_cli.py` ou `radio_lab.py` ne tourne.
+2. Vérifier qu’aucun autre `pokemon_trade_cli.py` ne tourne.
 3. Lancer le client avec les chemins absolus recommandés ci-dessous.
 4. Attendre `room_entered`, puis s’asseoir et accepter l’échange sur la Switch.
 5. Ne pas interrompre le processus entre `committed` et `saving`.
@@ -91,7 +91,7 @@ et le troisième Pokémon de l’équipe.
 ```bash
 pkexec /usr/bin/env PYTHONDONTWRITEBYTECODE=1 \
   "$PWD/.venv/bin/python" "$PWD/pokemon_trade_cli.py" \
-  --variant firered \
+  --game firered \
   --trainer-id 1 --secret-id 2 --name EMU \
   --passphrase-file "$PWD/.switch/ldn_passphrases.toml" \
   --trades 1 --slots 0 \
@@ -99,7 +99,7 @@ pkexec /usr/bin/env PYTHONDONTWRITEBYTECODE=1 \
   "$PWD/offered-1.pk3"
 ```
 
-`--variant` accepte `firered` ou `leafgreen`. Le nom contient de un à sept
+`--game` accepte `firered` ou `leafgreen`. Le nom contient de un à sept
 caractères Gen III. Les IDs et le nom décrivent le joueur émulé ; ils ne sont
 pas lus depuis le Pokémon offert.
 
@@ -134,7 +134,7 @@ la confirmation de la sauvegarde finale :
 pkexec /usr/bin/env PYTHONDONTWRITEBYTECODE=1 \
   "$PWD/.venv/bin/python" "$PWD/pokemon_trade_cli.py" \
   --disconnect-after-trade \
-  --variant firered --trainer-id 1 --secret-id 2 --name EMU \
+  --game firered --trainer-id 1 --secret-id 2 --name EMU \
   --passphrase-file "$PWD/.switch/ldn_passphrases.toml" \
   "$PWD/offered-1.pk3"
 ```
@@ -161,30 +161,14 @@ et ne demande aucun privilège :
 ```bash
 .venv/bin/python pokemon_trade_cli.py \
   --replay tests/fixtures/frlg/synthetic-trade-v1.jsonl \
-  --variant firered --trainer-id 1 --secret-id 2 --name EMU \
+  --game firered --trainer-id 1 --secret-id 2 --name EMU \
   offered-1.pk3
 ```
 
 Une capture live ne devient pas automatiquement une fixture : elle doit être
 expurgée et réencodée avec une identité, un réseau et des Pokémon synthétiques.
 
-## Laboratoire radio
-
-Pour découvrir et déchiffrer une advertisement sans rejoindre la session :
-
-```bash
-pkexec /usr/bin/env PYTHONDONTWRITEBYTECODE=1 \
-  "$PWD/.venv/bin/python" "$PWD/radio_lab.py" --discovery-only
-```
-
-Pour rejoindre LDN et compter les datagrammes PIA pendant dix secondes :
-
-```bash
-pkexec /usr/bin/env PYTHONDONTWRITEBYTECODE=1 \
-  "$PWD/.venv/bin/python" "$PWD/radio_lab.py" \
-  --passphrase-file "$PWD/.switch/ldn_passphrases.toml" \
-  --pia-observe-timeout 10
-```
+## Nettoyage radio
 
 Le programme crée temporairement `mon0` et `ldnclient`, les exclut de
 NetworkManager puis les retire à la sortie. `Ctrl+C`, `SIGTERM` et `SIGHUP`
@@ -210,7 +194,6 @@ Toutes les options sont disponibles avec :
 
 ```bash
 .venv/bin/python pokemon_trade_cli.py --help
-.venv/bin/python radio_lab.py --help
 ```
 
 ## Développement

@@ -1,7 +1,7 @@
 # Validation matérielle FRLG — Intel AX200
 
 Ce protocole est volontairement manuel : il ne doit jamais être exécuté en
-parallèle d’un `radio_lab.py` ou client privilégié existant.
+parallèle d’un autre client privilégié.
 
 1. Vérifier qu’aucun client LDN privilégié résiduel ne possède `ldnclient`; si
    une session est en cours, ne pas la tuer depuis un autre outil.
