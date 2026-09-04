@@ -9,6 +9,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ArchitectureTest(unittest.TestCase):
+    def test_trade_cli_is_the_only_top_level_cli(self) -> None:
+        self.assertTrue((ROOT / "pokemon_trade_cli.py").is_file())
+        self.assertFalse((ROOT / "radio_lab.py").exists())
+
     def test_common_package_does_not_depend_on_reference_or_frlg_wire_layers(self) -> None:
         forbidden = {"ldn", "frlgsim"}
         for path in (ROOT / "pokemon_trade").glob("*.py"):

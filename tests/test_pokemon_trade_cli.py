@@ -29,7 +29,7 @@ class PokemonTradeCliTest(unittest.TestCase):
         ):
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(main([
-                    "--replay", "synthetic.jsonl", "--variant", "firered", "--trainer-id", "1",
+                    "--replay", "synthetic.jsonl", "--game", "firered", "--trainer-id", "1",
                     "--secret-id", "2", "--name", "EMU", "offered.pk3",
                 ]), 1)
 
@@ -49,10 +49,17 @@ class PokemonTradeCliTest(unittest.TestCase):
             _arguments(["offered.pk3"])
         self.assertEqual(error.exception.code, 2)
 
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
+            _arguments([
+                "--variant", "firered", "--trainer-id", "1", "--secret-id", "2",
+                "--name", "EMU", "offered.pk3",
+            ])
+        self.assertEqual(error.exception.code, 2)
+
     def test_parses_live_and_replay_options_without_protocol_logic(self) -> None:
         args = _arguments(
             [
-                "--variant", "firered", "--trainer-id", "1", "--secret-id", "2", "--name", "EMU",
+                "--game", "firered", "--trainer-id", "1", "--secret-id", "2", "--name", "EMU",
                 "--slots", "0,1", "--disconnect-after-trade",
                 "--replay", "synthetic.jsonl", "a.pk3", "b.pk3",
             ]
@@ -60,20 +67,20 @@ class PokemonTradeCliTest(unittest.TestCase):
         self.assertEqual(args.slots, (0, 1))
         self.assertEqual(args.replay.name, "synthetic.jsonl")
         self.assertEqual(args.phase_timeout, 90.0)
+        self.assertEqual(args.game, "firered")
         self.assertTrue(args.disconnect_after_trade)
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
             _arguments(
                 [
-                    "--variant", "firered", "--trainer-id", "1", "--secret-id", "2", "--name", "EMU",
+                    "--game", "firered", "--trainer-id", "1", "--secret-id", "2", "--name", "EMU",
                     "--replay", "synthetic.jsonl", "--capture", "sensitive.jsonl", "a.pk3",
                 ]
             )
         self.assertEqual(_arguments([
-            "--variant", "firered", "--trainer-id", "1", "--secret-id", "2", "--name", "EMU", "a.pk3"
+            "--game", "firered", "--trainer-id", "1", "--secret-id", "2", "--name", "EMU", "a.pk3"
         ]).keys, PROJECT_ROOT / ".switch" / "prod.keys")
-        self.assertFalse(args.discovery_only)
         self.assertFalse(_arguments([
-            "--variant", "firered", "--trainer-id", "1", "--secret-id", "2",
+            "--game", "firered", "--trainer-id", "1", "--secret-id", "2",
             "--name", "EMU", "a.pk3",
         ]).disconnect_after_trade)
 
@@ -83,14 +90,14 @@ class PokemonTradeCliTest(unittest.TestCase):
             invalid.write_bytes(bytes(32) + b"\x01" + bytes(67))
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(main([
-                    "--variant", "firered", "--trainer-id", "1", "--secret-id", "2", "--name", "EMU",
+                    "--game", "firered", "--trainer-id", "1", "--secret-id", "2", "--name", "EMU",
                     str(invalid),
                 ]), 1)
 
     def test_verbose_diagnostics_exclude_identity_and_artifact_data(self) -> None:
         args = _arguments(
             [
-                "--variant", "firered", "--trainer-id", "12345", "--secret-id", "54321",
+                "--game", "firered", "--trainer-id", "12345", "--secret-id", "54321",
                 "--name", "PRIVATE", "--verbose", "offered.pk3",
             ]
         )

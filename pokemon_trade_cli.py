@@ -7,12 +7,12 @@ from pathlib import Path
 
 import trio
 
-from ldn_client import ActiveLdnConfig
 from ldn_protocol import load_keys
 from pokemon_trade.api import TradeEvent, TradeRequest, TradeResult, TradeStatus
 from pokemon_trade.artifacts import PokemonArtifact, export_artifacts
 from pokemon_trade.errors import TradeError
 from pokemon_trade.games.frlg.identity import FrlgIdentity, FrlgVariant
+from pokemon_trade.games.frlg.descriptor import FRLG_OBSERVED_COMMUNICATION_IDS
 from pokemon_trade.games.frlg.driver import FRLG_VBLANK_SECONDS
 from pokemon_trade.games.frlg.live import (
     FRLG_PIA_GAME_KEY,
@@ -39,14 +39,9 @@ def _slots(value: str) -> tuple[int, ...]:
 
 
 def _arguments(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run a local Pokémon FRLG follower trade.")
-    # `_capture_target_network` is the legacy discovery helper shared with
-    # radio_lab; make its non-observation mode explicit without exposing the
-    # radio-lab-only flag in this CLI.
-    parser.set_defaults(discovery_only=False)
+    parser = argparse.ArgumentParser(description="Run a local Pokémon follower trade.")
     parser.add_argument("team", nargs="+", type=Path, metavar="PK3", help="one to six .pk3 files")
-    parser.add_argument("--game", choices=("auto", "frlg"), default="auto")
-    parser.add_argument("--variant", choices=("firered", "leafgreen"), required=True)
+    parser.add_argument("--game", choices=("firered", "leafgreen"), required=True)
     parser.add_argument("--trainer-id", type=lambda value: int(value, 0), required=True)
     parser.add_argument("--secret-id", type=lambda value: int(value, 0), required=True)
     parser.add_argument("--name", required=True, help="one to seven Gen III trainer-name characters")
@@ -68,11 +63,8 @@ def _arguments(argv: list[str] | None = None) -> argparse.Namespace:
         "--phase-timeout", type=float, default=DEFAULT_FRLG_PHASE_TIMEOUT_SECONDS,
         help="maximum seconds to wait for each interactive FRLG trade phase",
     )
-    parser.add_argument("--communication-id", type=lambda value: int(value, 0))
     parser.add_argument("--scene-id", type=lambda value: int(value, 0))
     parser.add_argument("--app-version", type=lambda value: int(value, 0))
-    parser.add_argument("--nickname", default="SVPC")
-    parser.add_argument("--pia-port", type=int, default=12345)
     parser.add_argument(
         "--disconnect-after-trade",
         action="store_true",
@@ -93,8 +85,6 @@ def _arguments(argv: list[str] | None = None) -> argparse.Namespace:
         parser.error("--trades must be between one and six")
     if args.dwell <= 0 or args.discovery_timeout <= 0 or args.phase_timeout <= 0:
         parser.error("discovery timing values must be positive")
-    if not 1 <= args.pia_port <= 65535:
-        parser.error("--pia-port must be between 1 and 65535")
     if args.replay is not None and args.capture is not None:
         parser.error("--capture is only available for a live run")
     try:
@@ -117,12 +107,12 @@ def _request(args: argparse.Namespace) -> TradeRequest:
         tuple(artifacts),
         trade_count=args.trades,
         offered_slots=args.slots or (),
-        variant=args.variant,
+        variant=args.game,
     )
 
 
 def _identity(args: argparse.Namespace) -> FrlgIdentity:
-    return FrlgIdentity(args.trainer_id, args.secret_id, args.name, FrlgVariant(args.variant))
+    return FrlgIdentity(args.trainer_id, args.secret_id, args.name, FrlgVariant(args.game))
 
 
 def _emit(event: TradeEvent) -> None:
@@ -136,7 +126,7 @@ def _display_diagnostics(args: argparse.Namespace, request: TradeRequest) -> Non
     slots = request.offered_slots
     print(
         "diagnostic: "
-        f"mode={mode}, game={args.game}, variant={args.variant}, "
+        f"mode={mode}, game={args.game}, "
         f"trades={request.trade_count}, slots={','.join(map(str, slots))}, "
         f"disconnect_after_trade={args.disconnect_after_trade}, "
         f"phase_timeout={args.phase_timeout:.3f}s, "
@@ -163,7 +153,7 @@ async def _run_replay(args: argparse.Namespace, request: TradeRequest, identity:
             transport,
             request,
             _emit,
-            game_id=args.game,
+            game_id="frlg",
         )
         transport.assert_finished()
         return result
@@ -174,22 +164,15 @@ async def _run_replay(args: argparse.Namespace, request: TradeRequest, identity:
 async def _run_live(args: argparse.Namespace, network, passphrase: bytes, keys, request, identity):
     from Wifi.LdnStation import connect_ldn
 
-    config = ActiveLdnConfig(
-        phy=args.phy,
-        station_interface=args.station_interface,
-        nickname=identity.name.encode("utf-8"),
-        app_version=args.app_version if args.app_version is not None else int(network.app_version),
-        passphrase=passphrase,
-        pia_port=args.pia_port,
-    )
+    app_version = args.app_version if args.app_version is not None else int(network.app_version)
     try:
         async with connect_ldn(
-            config.phy, config.station_interface, network, keys, config.passphrase,
-            config.nickname, config.app_version,
+            args.phy, args.station_interface, network, keys, passphrase,
+            identity.name.encode("utf-8"), app_version,
         ) as connection:
             return await run_connected_trade(
-                connection, config.station_interface, request, identity, _emit,
-                game_id=args.game, capture_path=args.capture,
+                connection, args.station_interface, request, identity, _emit,
+                game_id="frlg", capture_path=args.capture,
                 tuning=FrlgProtocolTuning(args.phase_timeout),
                 disconnect_after_trade=args.disconnect_after_trade,
             )
@@ -235,17 +218,32 @@ def main(argv: list[str] | None = None) -> int:
             )
         else:
             from Wifi.LinuxRadioLease import LinuxRadioLease
-            from radio_lab import _capture_target_network, _read_passphrases
+            from pokemon_trade.transport.ldn_discovery import (
+                LdnDiscoveryConfig,
+                discover_target_network,
+                read_passphrases,
+            )
 
             if not args.keys.is_file():
                 raise FileNotFoundError(f"prod.keys not found: {args.keys}")
-            passphrases = _read_passphrases(args)
+            passphrases = read_passphrases(args.passphrase_file, args.passphrase_env)
             if not passphrases.by_communication_id and passphrases.fallback is None:
                 raise RuntimeError("set a passphrase environment variable or use --passphrase-file")
             keys = load_keys(args.keys)
             with LinuxRadioLease(args.phy, {args.monitor_interface, args.station_interface}):
-                network, passphrase = _capture_target_network(args, keys, passphrases, display=False)
-                assert passphrase is not None
+                network, passphrase = discover_target_network(
+                    LdnDiscoveryConfig(
+                        phy=args.phy,
+                        monitor_interface=args.monitor_interface,
+                        channels=args.channels,
+                        dwell_seconds=args.dwell,
+                        timeout_seconds=args.discovery_timeout,
+                        communication_ids=FRLG_OBSERVED_COMMUNICATION_IDS,
+                        scene_id=args.scene_id,
+                    ),
+                    keys,
+                    passphrases,
+                )
                 result = trio.run(_run_live, args, network, passphrase, keys, request, identity)
     except (OSError, RuntimeError, TradeError) as error:
         print(f"error: {error}", flush=True)

@@ -12,7 +12,7 @@ wheels = [
 ]
 
 [[package]]
-name = "bring-back-home-radio"
+name = "bring-back-home"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
