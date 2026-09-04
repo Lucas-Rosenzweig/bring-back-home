@@ -1,0 +1,201 @@
+{
+  "stage": "facts",
+  "title": "Client abstrait d’échange Pokémon",
+  "goalSlug": "pokemon-trade-client",
+  "facts": [
+    {
+      "id": "fact-01",
+      "text": "Le cœur LDN existant conserve ses responsabilités et son comportement : découverte, déchiffrement des advertisements, association, authentification, attribution IPv4, suivi de session et restauration radio.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-02",
+      "text": "L’ajout du client d’échange ne remplace pas le cœur LDN par la bibliothèque LDN du dépôt de référence et ne réintroduit pas ses contournements de gestion du matériel radio.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-03",
+      "text": "Le mode actuel de découverte et d’écoute PIA brute reste utilisable après l’ajout du mode échange.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-04",
+      "text": "Le périmètre futur du contrat couvre les jeux Pokémon exécutés sur Switch dont l’échange local passe par LDN, y compris les titres rétro distribués officiellement.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": false,
+      "automatedVerification": false
+    },
+    {
+      "id": "fact-05",
+      "text": "Les échanges Internet, les jeux dépourvus d’échange, le mode hôte, les combats, une interface graphique, un service réseau et la prise en charge explicite de la Switch 2 sont hors du premier périmètre.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": false,
+      "automatedVerification": false
+    },
+    {
+      "id": "fact-06",
+      "text": "L’API commune normalise uniquement l’identité d’un jeu, la préparation et l’exécution d’une demande d’échange, les événements de progression, le résultat final, la récupération ou l’export des artefacts Pokémon reçus (.pk3 pour FRLG et format propre à chaque futur jeu), l’annulation et les erreurs.",
+      "accepted": true,
+      "removed": false,
+      "comment": "Ajout demandé lors de la première revue : récupération des fichiers Pokémon reçus.",
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-07",
+      "text": "Le contrat de transport fourni aux clients de jeu expose des datagrammes UDP bidirectionnels et un contexte de session immuable comprenant au minimum le SSID, l’interface, l’identité et l’adresse du participant local, celles de l’hôte et l’adresse de broadcast.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-08",
+      "text": "PIA, sa couche fiable, l’émulation GBA/RFU et la machine d’état d’échange ne font pas partie du contrat commun initial ; ils restent encapsulés dans l’implémentation FRLG jusqu’à ce qu’un second jeu démontre une abstraction réellement partageable, et cette règle doit être explicitement rappelée dans le guide d’ajout d’un jeu.",
+      "accepted": true,
+      "removed": false,
+      "comment": "Renforcement demandé lors de la première revue pour éviter une généralisation prématurée lors du prochain jeu.",
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-09",
+      "text": "Une bibliothèque Python typée constitue l’API principale et une CLI fine utilise exactement cette API ; aucune logique protocolaire n’est dupliquée dans la CLI.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-10",
+      "text": "Un registre sélectionne automatiquement l’implémentation de jeu à partir des métadonnées LDN, notamment le communication ID, avec une option de sélection explicite pour les diagnostics.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-11",
+      "text": "La seule implémentation livrée dans ce premier objectif est Pokémon Rouge Feu / Vert Feuille ; une session LDN d’un autre jeu est signalée comme non prise en charge sans être traitée comme FRLG.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-12",
+      "text": "L’implémentation FRLG est une réimplémentation indépendante dans bring-back-home : elle ne copie pas de code et n’importe aucun module de /home/lucas/Documents/frlg-ldn-trade ; ce dépôt sert de référence comportementale et documentaire.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-13",
+      "text": "Le client FRLG se comporte comme le follower/joiner face à une Switch leader et reproduit la connexion PIA, la négociation de session, la couche fiable, la liaison GBA/RFU et la machine d’état nécessaire à l’échange.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-14",
+      "text": "Une demande FRLG accepte une équipe de 1 à 6 fichiers .pk3 valides, un nombre de 1 à 6 échanges et une liste explicite d’emplacements offerts distincts, avec des valeurs par défaut documentées.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-15",
+      "text": "Chaque échange FRLG validé produit exactement un Pokémon reçu de 100 octets au format .pk3, l’insère dans l’emplacement local offert et conserve les résultats dans l’ordre des échanges.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-16",
+      "text": "Un Pokémon reçu n’est déclaré ni écrit comme résultat avant le commit protocolaire de l’échange ; une interruption antérieure ne crée pas de faux succès ni de fichier de résultat partiel.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-17",
+      "text": "Après le dernier échange demandé, le client exécute l’annulation et la sortie gracieuses du salon, puis rend le contrôle au nettoyage LDN ; une annulation utilisateur suit elle aussi un chemin borné et nettoyable.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-18",
+      "text": "L’appelant peut observer des événements structurés pour les jalons principaux : LDN prêt, pair PIA connecté, entrée dans le salon, menu d’échange prêt, échange proposé, échange validé, sauvegarde, sortie, fin, annulation ou échec.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-19",
+      "text": "Les délais d’attente et erreurs distinguent au minimum session non prise en charge, datagramme invalide, échec cryptographique, violation d’état, timeout, déconnexion du pair et annulation ; aucune attente protocolaire n’est infinie sans signal de progression.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-20",
+      "text": "Le transport peut enregistrer une trace de datagrammes indépendante du jeu et la rejouer de façon déterministe sans matériel radio afin de tester tout le chemin FRLG au-dessus de LDN.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-21",
+      "text": "Les tests automatisés couvrent le contrat commun, le registre de jeux, les vecteurs binaires PIA/RFU/PK3, les transitions de la machine d’état FRLG, les retransmissions, l’annulation et un échange complet sur faux transport ou replay.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-22",
+      "text": "L’acceptation matérielle finale exige trois échanges FRLG réels consécutifs réussis avec l’Intel AX200, chacun produisant un .pk3 de 100 octets valide et se terminant par un nettoyage correct.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": false,
+      "automatedVerification": false
+    },
+    {
+      "id": "fact-23",
+      "text": "Les journaux, tests et fixtures versionnés ne contiennent aucune prod.keys, passphrase, adresse MAC réelle, SSID réel, nom de dresseur personnel, Pokémon personnel ni capture brute non expurgée.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": true,
+      "automatedVerification": true
+    },
+    {
+      "id": "fact-24",
+      "text": "La documentation décrit la séparation LDN/transport/client de jeu, le cycle d’un échange, le format d’un plugin de jeu, la procédure FRLG, le replay et les limites connues, en citant la documentation publique du protocole LDN ; le guide d’ajout d’un jeu exige de réévaluer PIA, la fiabilité et les couches métier avant de déplacer du code dans le noyau commun.",
+      "accepted": true,
+      "removed": false,
+      "recommendedAutomatedVerification": false,
+      "automatedVerification": false
+    }
+  ]
+}

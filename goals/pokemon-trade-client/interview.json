@@ -1,0 +1,164 @@
+{
+  "stage": "interview",
+  "title": "Client abstrait d’échange Pokémon",
+  "goalSlug": "pokemon-trade-client",
+  "questions": [
+    {
+      "id": "future_game_scope",
+      "prompt": "Quel périmètre la conception doit-elle promettre pour les futurs jeux ?",
+      "description": "Tous les jeux ne proposent pas les mêmes transports ni les mêmes fonctions d’échange ; le contrat doit annoncer une limite réaliste.",
+      "answerMode": "single-custom",
+      "recommendedAnswer": "Tous les titres Pokémon exécutés sur Switch dont l’échange local utilise LDN, y compris les titres rétro distribués officiellement ; les échanges Internet et les titres sans échange restent hors périmètre. La Switch 2 pourra être ajoutée plus tard sans être un critère du premier design.",
+      "recommendedOptionIds": [
+        "local_ldn"
+      ],
+      "options": [
+        {
+          "id": "local_ldn",
+          "label": "Échanges locaux LDN sur Switch"
+        },
+        {
+          "id": "all_transports",
+          "label": "Tous les échanges, y compris Internet"
+        },
+        {
+          "id": "switch_1_2",
+          "label": "Switch et Switch 2 dès maintenant"
+        }
+      ],
+      "required": true
+    },
+    {
+      "id": "abstraction_depth",
+      "prompt": "Jusqu’où faut-il normaliser le protocole dès la première version ?",
+      "description": "PIA, RFU et les machines d’état de jeu peuvent varier selon le titre ; une généralisation trop précoce créerait un contrat artificiel.",
+      "answerMode": "single-custom",
+      "recommendedAnswer": "Normaliser le cycle de vie d’un échange, les requêtes/résultats/événements, les erreurs et le transport de datagrammes. Conserver PIA, RFU et la machine d’état dans l’implémentation FRLG, puis extraire plus tard uniquement les composants dont la réutilisation est démontrée par un deuxième jeu.",
+      "recommendedOptionIds": [
+        "contract_first"
+      ],
+      "options": [
+        {
+          "id": "contract_first",
+          "label": "Contrat commun minimal"
+        },
+        {
+          "id": "shared_pia",
+          "label": "PIA commun dès maintenant"
+        },
+        {
+          "id": "generic_engine",
+          "label": "Moteur protocolaire entièrement générique"
+        }
+      ],
+      "required": true
+    },
+    {
+      "id": "public_surface",
+      "prompt": "Quelle surface publique doit livrer le projet ?",
+      "description": "Ce choix détermine où placer la configuration, les événements et la gestion des erreurs.",
+      "answerMode": "single-custom",
+      "recommendedAnswer": "Une bibliothèque Python typée constitue l’API principale, avec une CLI fine pour l’usage manuel et les essais sur console. Aucun serveur, service réseau ou interface graphique dans ce premier objectif.",
+      "recommendedOptionIds": [
+        "library_cli"
+      ],
+      "options": [
+        {
+          "id": "library_cli",
+          "label": "Bibliothèque et CLI"
+        },
+        {
+          "id": "cli_only",
+          "label": "CLI uniquement"
+        },
+        {
+          "id": "service_api",
+          "label": "Service/API réseau"
+        }
+      ],
+      "required": true
+    },
+    {
+      "id": "frlg_mvp",
+      "prompt": "Quelle parité FRLG doit définir la fin de cette première implémentation ?",
+      "description": "Le dépôt de référence sait déjà effectuer plusieurs échanges successifs et relire des captures, mais le portage complet augmente le périmètre.",
+      "answerMode": "single-custom",
+      "recommendedAnswer": "Préserver la capacité éprouvée du dépôt de référence : client follower/joiner face à une Switch leader, parti de 1 à 6 Pokémon, 1 à 6 échanges successifs, fichiers .pk3 en entrée/sortie, sortie gracieuse, journaux structurés et replay hors ligne. Le mode hôte, les combats et une UI restent hors périmètre.",
+      "recommendedOptionIds": [
+        "reference_parity"
+      ],
+      "options": [
+        {
+          "id": "reference_parity",
+          "label": "Parité du dépôt de référence"
+        },
+        {
+          "id": "single_trade",
+          "label": "Un échange minimal seulement"
+        },
+        {
+          "id": "protocol_only",
+          "label": "Protocole sans échange réel"
+        }
+      ],
+      "required": true
+    },
+    {
+      "id": "source_reuse",
+      "prompt": "Comment traiter le code AGPL-3.0 de frlg-ldn-trade ?",
+      "description": "Réutiliser ou adapter directement ce code impose de décider explicitement de la provenance et de la compatibilité de licence du projet cible.",
+      "answerMode": "single-custom",
+      "recommendedAnswer": "Porter les modules protocolaires utiles dans bring-back-home avec historique de provenance et attribution, puis placer la distribution résultante sous une licence compatible AGPL-3.0. Éviter une dépendance d’exécution vers l’ancien cœur LDN et ne reprendre aucun de ses contournements radio.",
+      "recommendedOptionIds": [
+        "port_agpl"
+      ],
+      "options": [
+        {
+          "id": "port_agpl",
+          "label": "Portage attribué compatible AGPL"
+        },
+        {
+          "id": "external_dependency",
+          "label": "Dépendance vers le dépôt existant"
+        },
+        {
+          "id": "clean_reimplementation",
+          "label": "Réimplémentation indépendante"
+        }
+      ],
+      "required": true
+    },
+    {
+      "id": "acceptance",
+      "prompt": "Quels contrôles doivent être obligatoires avant de considérer FRLG terminé ?",
+      "description": "Les tests hors ligne ne peuvent pas prouver à eux seuls le comportement radio et temporel face au jeu réel.",
+      "answerMode": "multi-custom",
+      "recommendedAnswer": "Tests unitaires par couche, vecteurs binaires connus, replays déterministes de captures expurgées, test d’intégration avec faux transport, puis au moins trois échanges réels consécutifs avec l’AX200 et un contrôle avec un adaptateur déjà réputé fiable. Aucun secret, Pokémon personnel, MAC ou capture brute ne doit entrer dans Git.",
+      "recommendedOptionIds": [
+        "unit_vectors",
+        "offline_replay",
+        "live_ax200",
+        "known_good_control"
+      ],
+      "options": [
+        {
+          "id": "unit_vectors",
+          "label": "Tests unitaires et vecteurs"
+        },
+        {
+          "id": "offline_replay",
+          "label": "Replay et faux transport"
+        },
+        {
+          "id": "live_ax200",
+          "label": "Trois échanges AX200"
+        },
+        {
+          "id": "known_good_control",
+          "label": "Contrôle adaptateur fiable"
+        }
+      ],
+      "required": true
+    }
+  ]
+}
