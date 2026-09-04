@@ -78,7 +78,12 @@ def _participant_name(participant: ParticipantInfo) -> str:
     return str(value).rstrip("\0")
 
 
-async def _observe_pia(interface: str, port: int) -> None:
+async def _observe_pia(
+    interface: str,
+    port: int,
+    observation_timeout: float | None = None,
+    display_packets: bool = True,
+) -> int:
     import trio
 
     receiver = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -92,23 +97,37 @@ async def _observe_pia(interface: str, port: int) -> None:
     receiver.setblocking(False)
     with receiver:
         print(f"Écoute PIA brute active sur UDP/{port}", flush=True)
-        while True:
-            await trio.lowlevel.wait_readable(receiver.fileno())
-            try:
-                payload, source = receiver.recvfrom(65535)
-            except BlockingIOError:
-                continue
-            print(
-                f"PIA brut {source[0]}:{source[1]} — {len(payload)} octets: "
-                f"{payload.hex(' ')}",
-                flush=True,
-            )
+        count = 0
+        scope = (
+            trio.move_on_after(observation_timeout)
+            if observation_timeout is not None
+            else trio.CancelScope()
+        )
+        with scope:
+            while True:
+                await trio.lowlevel.wait_readable(receiver.fileno())
+                try:
+                    payload, source = receiver.recvfrom(65535)
+                except BlockingIOError:
+                    continue
+                count += 1
+                if display_packets:
+                    print(
+                        f"PIA brut {source[0]}:{source[1]} — {len(payload)} octets: "
+                        f"{payload.hex(' ')}",
+                        flush=True,
+                    )
+        if observation_timeout is not None:
+            print(f"PIA datagrams observed: {count}", flush=True)
+        return count
 
 
 async def connect_and_observe(
     config: ActiveLdnConfig,
     network: NetworkInfo,
     keys: dict[str, bytes],
+    observation_timeout: float | None = None,
+    display_packets: bool = True,
 ) -> None:
     """Associate, authenticate, configure LDN IP, then observe raw PIA UDP."""
     import trio
@@ -142,8 +161,10 @@ async def connect_and_observe(
 
         async with trio.open_nursery() as nursery:
             nursery.start_soon(connection.monitor)
-            nursery.start_soon(
-                _observe_pia,
+            await _observe_pia(
                 config.station_interface,
                 config.pia_port,
+                observation_timeout,
+                display_packets,
             )
+            nursery.cancel_scope.cancel()

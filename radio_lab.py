@@ -82,6 +82,11 @@ def _arguments(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--nickname", default="SVPC")
     parser.add_argument("--pia-port", type=int, default=12345)
     parser.add_argument(
+        "--pia-observe-timeout",
+        type=float,
+        help="stop after this many seconds of PIA observation and print a count",
+    )
+    parser.add_argument(
         "--passphrase-env",
         default="LDN_PASSPHRASE",
         help="environment variable containing the LDN passphrase",
@@ -103,6 +108,8 @@ def _arguments(argv: list[str] | None = None) -> argparse.Namespace:
         parser.error("--discovery-timeout must be greater than zero")
     if not 1 <= args.pia_port <= 65535:
         parser.error("--pia-port must be between 1 and 65535")
+    if args.pia_observe_timeout is not None and args.pia_observe_timeout <= 0:
+        parser.error("--pia-observe-timeout must be greater than zero")
     if len(args.nickname.encode("utf-8")) > 32:
         parser.error("--nickname must fit in 32 UTF-8 bytes")
     return args
@@ -116,6 +123,8 @@ def _capture_target_network(
     args: argparse.Namespace,
     keys: dict[str, bytes],
     passphrases: Passphrases,
+    *,
+    display: bool = True,
 ) -> tuple[NetworkInfo, bytes | None]:
     deadline = time.monotonic() + args.discovery_timeout
     reported_decryption_failure = False
@@ -207,7 +216,8 @@ def _capture_target_network(
             monitor.stop_channel_hopping()
             monitor.set_channel(channel)
             print(f"Session cible trouvée sur le canal {channel}.", flush=True)
-            display_network(network)
+            if display:
+                display_network(network)
             return network, passphrase
 
     raise TimeoutError(
@@ -299,7 +309,14 @@ def main(argv: list[str] | None = None) -> None:
                 passphrase=passphrase,
                 pia_port=args.pia_port,
             )
-            trio.run(connect_and_observe, config, network, keys)
+            trio.run(
+                connect_and_observe,
+                config,
+                network,
+                keys,
+                args.pia_observe_timeout,
+                False,
+            )
     except KeyboardInterrupt:
         print("Arrêt demandé; restauration des interfaces Wi-Fi.")
 
