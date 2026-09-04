@@ -2,3 +2,8 @@ __pycache__/
 .venv/
 .switch/
 .serena/
+captures/
+output/
+*.pk3
+*.pcap
+*.pcapng
