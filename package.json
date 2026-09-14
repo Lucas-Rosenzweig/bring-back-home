@@ -8,7 +8,9 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "test": "node --import tsx --test tests/*.test.ts && python3 -m unittest discover -s tests -p \"*_test.py\""
+    "test": "node scripts/test.mjs",
+    "assets:download": "python3 scripts/download-pokemon-assets.py",
+    "assets:verify": "python3 scripts/download-pokemon-assets.py --verify"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
@@ -19,9 +21,11 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.11.4",
+    "@types/jsdom": "^30.0.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^6.0.2",
+    "jsdom": "^30.0.1",
     "tsx": "^4.23.13",
     "typescript": "~6.0.3",
     "vite": "^8.0.16"

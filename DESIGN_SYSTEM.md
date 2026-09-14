@@ -54,9 +54,13 @@ explicite. Les données individuelles absentes restent « Non renseigné » / «
 Le type par défaut vient du référentiel local ; une forme alternative sans types
 explicites n’hérite pas d’un type potentiellement erroné.
 
-Les sprites / illustrations sont chargés depuis le dépôt PokeAPI/sprites.
-Une Poké Ball remplace les images indisponibles, inconnues ou de forme non résolue.
-La consultation des données fonctionne sans ces images.
+Les sprites / illustrations sont embarqués dans `public/assets/pokemon`.
+`PokemonArt` charge d’abord l’image locale. En cas d’erreur seulement, il tente
+la même image sur PokeAPI/sprites ; un deuxième échec affiche une Poké Ball.
+Changer de Pokémon, de taille ou de variante chromatique réinitialise ce parcours.
+Les formes non résolues utilisent directement la Poké Ball afin de ne pas montrer
+une illustration incorrecte. Les fichiers des formes alternatives sont déjà inclus
+pour leur futur raccordement au décodeur.
 
 ## Vérification visuelle en développement
 

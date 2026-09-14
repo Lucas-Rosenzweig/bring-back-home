@@ -26,3 +26,7 @@ dist-ssr
 # Python test artifacts
 __pycache__/
 *.pyc
+
+# Local database fixture snapshots and operation locks
+*.fixtures-original.sqlite3*
+*.fixtures-lock/
