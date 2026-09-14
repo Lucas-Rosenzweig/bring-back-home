@@ -9,12 +9,20 @@ pub fn run() {
             tauri_plugin_sql::Builder::new()
                 .add_migrations(
                     DATABASE_URL,
-                    vec![Migration {
-                        version: 1,
-                        description: "create pokemon table",
-                        sql: include_str!("../migrations/0001_create_pokemon.sql"),
-                        kind: MigrationKind::Up,
-                    }],
+                    vec![
+                        Migration {
+                            version: 1,
+                            description: "create pokemon table",
+                            sql: include_str!("../migrations/0001_create_pokemon.sql"),
+                            kind: MigrationKind::Up,
+                        },
+                        Migration {
+                            version: 2,
+                            description: "create trainer table",
+                            sql: include_str!("../migrations/0002_create_trainer.sql"),
+                            kind: MigrationKind::Up,
+                        },
+                    ],
                 )
                 .build(),
         )
