@@ -22,6 +22,12 @@ pub fn run() {
                             sql: include_str!("../migrations/0002_create_trainer.sql"),
                             kind: MigrationKind::Up,
                         },
+                        Migration {
+                            version: 3,
+                            description: "collection positions and optional details",
+                            sql: include_str!("../migrations/0003_collection_details.sql"),
+                            kind: MigrationKind::Up,
+                        },
                     ],
                 )
                 .build(),

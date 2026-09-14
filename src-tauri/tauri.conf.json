@@ -12,9 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "bring-back-home",
-        "width": 800,
-        "height": 600
+        "title": "Bring Back Home",
+        "width": 1440,
+        "height": 960,
+        "minWidth": 1100,
+        "minHeight": 760
       }
     ],
     "security": {
@@ -34,7 +36,9 @@
   },
   "plugins": {
     "sql": {
-      "preload": ["sqlite:bring-back-home.db"]
+      "preload": [
+        "sqlite:bring-back-home.db"
+      ]
     }
   }
 }
